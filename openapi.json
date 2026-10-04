@@ -1,0 +1,138 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "DNSGuard Enterprise API",
+    "description": "Enterprise-grade DNS propagation, SPF/DKIM/DMARC deliverability audit, anti-spoofing and Anycast DNS intelligence engine by Vance-Systems.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Liam Vance & Devon Vance (Vance-Systems)",
+      "url": "https://github.com/Vance-Systems/dnsguard-api"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://dnsguard-api.onrender.com",
+      "description": "Production Render Cloud (Free Tier)"
+    }
+  ],
+  "paths": {
+    "/v1/deliverability": {
+      "get": {
+        "summary": "Audit Domain Deliverability & Anti-Spoofing",
+        "description": "Analyzes SPF, DMARC policy, and MX records to calculate email deliverability score and identify spoofing vulnerabilities.",
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "query",
+            "required": true,
+            "description": "Target domain (e.g. stripe.com or company.com)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "required": false,
+            "description": "Optional API Key for high-volume quota tiers",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Comprehensive deliverability audit and anti-spoofing verdict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "domain": { "type": "string" },
+                    "status": { "type": "string" },
+                    "deliverability_score": { "type": "integer" },
+                    "spf_status": { "type": "string" },
+                    "spf_record": { "type": "string" },
+                    "dmarc_status": { "type": "string" },
+                    "dmarc_record": { "type": "string" },
+                    "dmarc_policy": { "type": "string" },
+                    "mx_status": { "type": "string" },
+                    "primary_mx": { "type": "string" },
+                    "spoofing_vulnerable": { "type": "boolean" },
+                    "recommendations": { "type": "array", "items": { "type": "string" } },
+                    "latency_ms": { "type": "number" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/propagation": {
+      "get": {
+        "summary": "Check Global Anycast DNS Propagation",
+        "description": "Simultaneously probes Tier-1 global Anycast resolvers across North America, Europe, Asia-Pacific, and South America.",
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "query",
+            "required": true,
+            "description": "Target domain to probe",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "record_type",
+            "in": "query",
+            "required": false,
+            "description": "DNS record type (A, AAAA, MX, TXT, CNAME, NS)",
+            "schema": {
+              "type": "string",
+              "default": "A"
+            }
+          },
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Global propagation latency and node sync status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string" },
+                    "domain": { "type": "string" },
+                    "record_type": { "type": "string" },
+                    "global_propagation_rate": { "type": "string" },
+                    "probed_nodes": { "type": "array", "items": { "type": "object" } },
+                    "total_latency_ms": { "type": "number" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health Check & SLA Probe",
+        "responses": {
+          "200": {
+            "description": "Service health status"
+          }
+        }
+      }
+    }
+  }
+}
